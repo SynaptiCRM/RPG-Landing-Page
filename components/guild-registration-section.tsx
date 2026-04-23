@@ -13,11 +13,47 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { cn } from "@/lib/utils"
 import { COURSE_OPTIONS, VALID_COURSE_VALUES } from "@/lib/guild-courses"
+
+type FieldKey = "name" | "phone" | "course"
+
+type FieldErrors = Partial<Record<FieldKey, string>>
+
+function countDigits(value: string) {
+  return value.replace(/\D/g, "").length
+}
+
+/** Soft field highlight — gold tint, not alarm red */
+const guildFieldNeedsAttention =
+  "border-primary/45 bg-primary/[0.06] aria-invalid:border-primary/50 aria-invalid:ring-primary/25 dark:aria-invalid:ring-primary/20"
+
+const guildHintBelowField = "text-sm font-medium leading-relaxed text-primary/90"
+
+function validateGuildForm(name: string, phone: string, course: string): FieldErrors | null {
+  const errors: FieldErrors = {}
+
+  if (!name) {
+    errors.name = "Вкажи ім'я героя — так ми знатимемо, як до тебе звертатись."
+  }
+
+  if (!phone) {
+    errors.phone = "Потрібен номер батьків — надішлемо деталі щодо квитка на урок."
+  } else if (countDigits(phone) < 10) {
+    errors.phone = "Схоже, номер неповний. Перевір код країни та всі цифри (наприклад, +380 …)."
+  }
+
+  if (!course) {
+    errors.course = "Обери напрямок пригоди — наставник підготує відповідний пробний урок."
+  }
+
+  return Object.keys(errors).length > 0 ? errors : null
+}
 
 export function GuildRegistrationSection() {
   const [pending, setPending] = useState(false)
   const [course, setCourse] = useState<string>("")
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
 
   useEffect(() => {
     const applySelectedCourse = () => {
@@ -48,13 +84,13 @@ export function GuildRegistrationSection() {
     const name = String(data.get("name") || "").trim()
     const phone = String(data.get("phone") || "").trim()
 
-    if (!name || !phone || !course) {
-      toast.error("Заповни всі поля, герой!", {
-        description: "Нам потрібні ім'я, телефон і обраний клас.",
-      })
+    const validation = validateGuildForm(name, phone, course)
+    if (validation) {
+      setFieldErrors(validation)
       return
     }
 
+    setFieldErrors({})
     setPending(true)
     try {
       const res = await fetch("/api/guild-registration", {
@@ -80,6 +116,7 @@ export function GuildRegistrationSection() {
       })
       form.reset()
       setCourse("")
+      setFieldErrors({})
     } catch {
       toast.error("Немає зв'язку", {
         description: "Перевір інтернет і спробуй ще раз.",
@@ -116,7 +153,7 @@ export function GuildRegistrationSection() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="grid gap-4 sm:gap-5">
+            <form noValidate onSubmit={handleSubmit} className="grid gap-4 sm:gap-5">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="grid gap-2">
                   <Label htmlFor="name" className="font-display text-xs font-semibold uppercase tracking-wider">
@@ -126,9 +163,24 @@ export function GuildRegistrationSection() {
                     id="name"
                     name="name"
                     placeholder="Наприклад, Марк"
-                    required
-                    className="h-12 bg-secondary/60 text-base"
+                    autoComplete="name"
+                    aria-invalid={!!fieldErrors.name}
+                    aria-describedby={fieldErrors.name ? "guild-name-error" : undefined}
+                    onChange={() => setFieldErrors((prev) => ({ ...prev, name: undefined }))}
+                    className={cn(
+                      "h-12 bg-secondary/60 text-base",
+                      fieldErrors.name && guildFieldNeedsAttention,
+                    )}
                   />
+                  {fieldErrors.name ? (
+                    <p
+                      id="guild-name-error"
+                      role="alert"
+                      className={guildHintBelowField}
+                    >
+                      {fieldErrors.name}
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="grid gap-2">
@@ -140,9 +192,25 @@ export function GuildRegistrationSection() {
                     name="phone"
                     type="tel"
                     placeholder="+380 ..."
-                    required
-                    className="h-12 bg-secondary/60 text-base"
+                    autoComplete="tel"
+                    inputMode="tel"
+                    aria-invalid={!!fieldErrors.phone}
+                    aria-describedby={fieldErrors.phone ? "guild-phone-error" : undefined}
+                    onChange={() => setFieldErrors((prev) => ({ ...prev, phone: undefined }))}
+                    className={cn(
+                      "h-12 bg-secondary/60 text-base",
+                      fieldErrors.phone && guildFieldNeedsAttention,
+                    )}
                   />
+                  {fieldErrors.phone ? (
+                    <p
+                      id="guild-phone-error"
+                      role="alert"
+                      className={guildHintBelowField}
+                    >
+                      {fieldErrors.phone}
+                    </p>
+                  ) : null}
                 </div>
               </div>
 
@@ -150,11 +218,21 @@ export function GuildRegistrationSection() {
                 <Label htmlFor="course" className="font-display text-xs font-semibold uppercase tracking-wider">
                   Обраний клас
                 </Label>
-                <Select value={course} onValueChange={setCourse}>
+                <Select
+                  value={course}
+                  onValueChange={(v) => {
+                    setCourse(v)
+                    setFieldErrors((prev) => ({ ...prev, course: undefined }))
+                  }}
+                >
                   <SelectTrigger
                     id="course"
-                    aria-required
-                    className="h-12 w-full min-w-0 rounded-md border border-input bg-secondary/60 px-3 text-base text-foreground shadow-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[placeholder]:text-muted-foreground"
+                    aria-invalid={!!fieldErrors.course}
+                    aria-describedby={fieldErrors.course ? "guild-course-error" : undefined}
+                    className={cn(
+                      "h-12 w-full min-w-0 rounded-md border border-input bg-secondary/60 px-3 text-base text-foreground shadow-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[placeholder]:text-muted-foreground",
+                      fieldErrors.course && guildFieldNeedsAttention,
+                    )}
                   >
                     <SelectValue placeholder="Обери напрямок пригоди..." />
                   </SelectTrigger>
@@ -169,6 +247,15 @@ export function GuildRegistrationSection() {
                     ))}
                   </SelectContent>
                 </Select>
+                {fieldErrors.course ? (
+                  <p
+                    id="guild-course-error"
+                    role="alert"
+                    className={guildHintBelowField}
+                  >
+                    {fieldErrors.course}
+                  </p>
+                ) : null}
               </div>
 
               <Button
