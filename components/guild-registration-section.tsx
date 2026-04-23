@@ -13,22 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-
-const VALID_COURSE_VALUES = new Set([
-  "scratch",
-  "game-design",
-  "roblox",
-  "python-kids",
-  "websites",
-])
-
-const COURSE_OPTIONS = [
-  { value: "scratch", label: "Курс Scratch" },
-  { value: "game-design", label: "Курс Game Design" },
-  { value: "roblox", label: "Курс Roblox" },
-  { value: "python-kids", label: "Курс Python для дітей" },
-  { value: "websites", label: "Курс Створення сайтів" },
-]
+import { COURSE_OPTIONS, VALID_COURSE_VALUES } from "@/lib/guild-courses"
 
 export function GuildRegistrationSection() {
   const [pending, setPending] = useState(false)
@@ -71,15 +56,37 @@ export function GuildRegistrationSection() {
     }
 
     setPending(true)
-    // Simulated submission — easy to swap with a real webhook
-    await new Promise((r) => setTimeout(r, 900))
-    setPending(false)
+    try {
+      const res = await fetch("/api/guild-registration", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, course }),
+      })
+      const json = (await res.json().catch(() => ({}))) as { error?: string }
 
-    toast.success("Квиток отримано!", {
-      description: `${name}, ми зв'яжемось з тобою найближчим часом для старту квесту.`,
-    })
-    form.reset()
-    setCourse("")
+      if (!res.ok) {
+        const msg =
+          res.status === 503
+            ? "Форма тимчасово недоступна. Спробуй пізніше або напиши нам у месенджер."
+            : json.error === "Webhook delivery failed"
+              ? "Не вдалося доставити заявку. Спробуй ще раз за хвилину."
+              : "Щось пішло не так. Перевір дані та спробуй ще раз."
+        toast.error("Не вдалося відправити", { description: msg })
+        return
+      }
+
+      toast.success("Квиток отримано!", {
+        description: `${name}, ми зв'яжемось з тобою найближчим часом для старту квесту.`,
+      })
+      form.reset()
+      setCourse("")
+    } catch {
+      toast.error("Немає зв'язку", {
+        description: "Перевір інтернет і спробуй ще раз.",
+      })
+    } finally {
+      setPending(false)
+    }
   }
 
   return (
