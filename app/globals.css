@@ -189,6 +189,78 @@
     background-size: 200% 100%;
     animation: shimmer 3s linear infinite;
   }
+
+  @keyframes golden-ticket-enter {
+    0% {
+      opacity: 0;
+      transform: scale(0.88) translateY(14px) rotate(-2deg);
+      filter: blur(6px);
+    }
+    55% {
+      opacity: 1;
+      transform: scale(1.02) translateY(0) rotate(0.6deg);
+      filter: blur(0);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0) rotate(0deg);
+      filter: blur(0);
+    }
+  }
+  .animate-golden-ticket-enter {
+    animation: golden-ticket-enter 0.75s cubic-bezier(0.34, 1.45, 0.64, 1) forwards;
+  }
+
+  @keyframes magic-ring {
+    0% {
+      opacity: 0.55;
+      transform: scale(0.65);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.35);
+    }
+  }
+  .animate-magic-ring {
+    animation: magic-ring 1.4s ease-out infinite;
+  }
+  .animation-delay-150 {
+    animation-delay: 150ms;
+  }
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  @keyframes sparkle-pop {
+    0% {
+      opacity: 0;
+      transform: translateY(0) scale(0.25);
+    }
+    40% {
+      opacity: 1;
+      transform: translateY(-2.75rem) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-5.5rem) scale(0.15);
+    }
+  }
+  .animate-sparkle-pop {
+    animation: sparkle-pop 1.15s ease-out forwards;
+  }
+
+  .ticket-shimmer {
+    background: linear-gradient(
+      105deg,
+      transparent 35%,
+      oklch(0.98 0.02 90 / 0.45) 48%,
+      oklch(0.99 0.01 90 / 0.65) 50%,
+      oklch(0.98 0.02 90 / 0.45) 52%,
+      transparent 65%
+    );
+    background-size: 220% 100%;
+    animation: shimmer 2.2s ease-in-out infinite;
+  }
 }
 
 @media (max-width: 767px) {

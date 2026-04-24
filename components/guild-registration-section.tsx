@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { Ticket, Sparkles } from "lucide-react"
+import { GuildGoldenTicketDialog } from "@/components/guild-golden-ticket-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -30,6 +31,10 @@ const guildFieldNeedsAttention =
 
 const guildHintBelowField = "text-sm font-medium leading-relaxed text-primary/90"
 
+function randomGuildTicketNumber() {
+  return Math.floor(Math.random() * (2000 - 486 + 1)) + 486
+}
+
 function validateGuildForm(name: string, phone: string, course: string): FieldErrors | null {
   const errors: FieldErrors = {}
 
@@ -54,6 +59,8 @@ export function GuildRegistrationSection() {
   const [pending, setPending] = useState(false)
   const [course, setCourse] = useState<string>("")
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  const [goldenTicket, setGoldenTicket] = useState<{ heroName: string; number: number } | null>(null)
+  const [goldenTicketOpen, setGoldenTicketOpen] = useState(false)
 
   useEffect(() => {
     const applySelectedCourse = () => {
@@ -111,9 +118,8 @@ export function GuildRegistrationSection() {
         return
       }
 
-      toast.success("Квиток отримано!", {
-        description: `${name}, ми зв'яжемось з тобою найближчим часом для старту квесту.`,
-      })
+      setGoldenTicket({ heroName: name, number: randomGuildTicketNumber() })
+      setGoldenTicketOpen(true)
       form.reset()
       setCourse("")
       setFieldErrors({})
@@ -128,6 +134,18 @@ export function GuildRegistrationSection() {
 
   return (
     <section id="guild" className="relative border-t border-border py-14 sm:py-16 md:py-24">
+      <GuildGoldenTicketDialog
+        key={goldenTicket ? `${goldenTicket.number}-${goldenTicket.heroName}` : "idle"}
+        open={goldenTicketOpen}
+        onOpenChange={(next) => {
+          setGoldenTicketOpen(next)
+          if (!next) {
+            window.setTimeout(() => setGoldenTicket(null), 320)
+          }
+        }}
+        heroName={goldenTicket?.heroName ?? ""}
+        ticketNumber={goldenTicket?.number ?? 486}
+      />
       {/* Background glow */}
       <div
         className="absolute left-1/2 top-1/2 size-[380px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[80px] sm:size-[520px] sm:blur-[110px] md:size-[700px] md:blur-[140px]"
