@@ -1,8 +1,7 @@
 "use client"
 
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { Sparkles, Ticket } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Star, Ticket } from "lucide-react"
 import { Dialog, DialogOverlay, DialogPortal } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
@@ -12,8 +11,6 @@ type GuildGoldenTicketDialogProps = {
   heroName: string
   ticketNumber: number
 }
-
-const SPARKLE_ANGLES = [0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320]
 
 export function GuildGoldenTicketDialog({
   open,
@@ -39,91 +36,110 @@ export function GuildGoldenTicketDialog({
             closeBtn?.focus()
           }}
           className={cn(
-            "fixed top-1/2 left-1/2 z-50 w-[min(calc(100vw-1.5rem),22rem)] -translate-x-1/2 -translate-y-1/2 outline-none",
+            "fixed top-1/2 left-1/2 z-50 w-[min(calc(100vw-1rem),58rem)] -translate-x-1/2 -translate-y-1/2 outline-none",
             "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-200",
           )}
         >
-          <div className="relative flex flex-col items-center">
-            {/* Expanding magic rings */}
+          <div className="relative">
             <div
               className="pointer-events-none absolute inset-0 flex items-center justify-center"
               aria-hidden="true"
             >
-              <span className="absolute size-[min(100vw,28rem)] rounded-full border border-primary/25 animate-magic-ring" />
-              <span className="absolute size-[min(90vw,24rem)] rounded-full border border-magic/30 animate-magic-ring animation-delay-150" />
-              <span className="absolute size-[min(80vw,20rem)] rounded-full border border-accent/25 animate-magic-ring animation-delay-300" />
+              <span className="absolute h-[16rem] w-[95%] rounded-full bg-primary/30 blur-3xl sm:h-[20rem]" />
             </div>
 
-            {/* Sparkles around ticket */}
-            <div
-              className="pointer-events-none absolute inset-0 flex items-center justify-center"
-              aria-hidden="true"
-            >
-              {SPARKLE_ANGLES.map((deg, i) => (
-                <span
-                  key={deg}
-                  className="absolute flex h-44 w-3 items-start justify-center"
-                  style={{ transform: `rotate(${deg}deg)` }}
+            <div className="animate-ticket-pop-in">
+              <div className="animate-ticket-float">
+                <article
+                  className="ticket-notch relative flex w-full overflow-hidden rounded-sm bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500 shadow-[0_0_60px_rgba(251,191,36,0.35),0_20px_40px_-10px_rgba(180,83,9,0.5)] ring-1 ring-amber-300/60"
+                  style={{ minHeight: "220px" }}
                 >
-                  <span
-                    className="size-2 shrink-0 rounded-full bg-primary shadow-[0_0_12px_2px_oklch(0.82_0.17_82_/_0.55)] animate-sparkle-pop opacity-0"
-                    style={{ animationDelay: `${120 + i * 42}ms` }}
-                  />
-                </span>
-              ))}
-            </div>
-
-            {/* Ticket card */}
-            <div className="relative w-full animate-golden-ticket-enter opacity-0 [animation-fill-mode:forwards]">
-              <div className="relative overflow-hidden rounded-2xl p-[2px] shadow-[0_0_40px_-8px_oklch(0.82_0.17_82_/_0.55),0_0_80px_-20px_oklch(0.65_0.22_295_/_0.35)]">
-                <div
-                  className="pointer-events-none absolute inset-0 rounded-2xl bg-[conic-gradient(from_120deg,var(--color-primary),var(--color-magic),var(--color-accent),var(--color-primary))] opacity-90"
-                  aria-hidden="true"
-                />
-                <div
-                  className="ticket-shimmer pointer-events-none absolute inset-0 rounded-[calc(1rem-1px)] opacity-40"
-                  aria-hidden="true"
-                />
-                <div className="relative rounded-[calc(1rem-2px)] bg-gradient-to-b from-amber-100 via-amber-200 to-amber-300 px-6 py-8 text-center sm:px-8 sm:py-9">
-                  {/* Perforation strip */}
                   <div
-                    className="pointer-events-none absolute left-3 right-3 top-1/2 h-4 -translate-y-1/2 border-y border-dashed border-amber-900/20 bg-amber-950/[0.03]"
                     aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 opacity-30 mix-blend-overlay"
+                    style={{
+                      backgroundImage:
+                        "radial-gradient(circle at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 35%), radial-gradient(circle at 80% 70%, rgba(120,53,15,0.3) 0%, transparent 40%)",
+                    }}
+                  />
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-y-0 -inset-x-1/2 overflow-hidden"
+                  >
+                    <div
+                      className="animate-ticket-shimmer absolute inset-y-0 left-0 w-1/3"
+                      style={{
+                        background:
+                          "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.05) 70%, transparent 100%)",
+                      }}
+                    />
+                  </div>
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-3 rounded-sm border border-amber-700/30"
                   />
 
-                  <div className="relative mb-5 flex justify-center sm:mb-6">
-                    <span className="flex size-14 items-center justify-center rounded-full bg-amber-950/10 text-amber-950 ring-2 ring-amber-950/15 sm:size-16">
-                      <Ticket className="size-7 sm:size-8" strokeWidth={2.25} aria-hidden="true" />
+                  <div className="relative flex flex-1 flex-col justify-center gap-3 px-5 py-7 sm:px-10">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.35em] text-amber-900/80">
+                      ★ Гільдія IT ★
+                    </span>
+                    <DialogPrimitive.Title className="text-shadow-gold text-2xl font-black uppercase leading-tight tracking-tight text-amber-950 sm:text-4xl">
+                      Квиток №{ticketNumber}
+                      <br />
+                      <span className="text-amber-900">Отримано!</span>
+                    </DialogPrimitive.Title>
+                    <DialogPrimitive.Description className="max-w-md text-sm leading-relaxed text-amber-950/80 sm:text-base">
+                      {heroName}, ми зв&apos;яжемося з вами найближчим часом для старту квесту.
+                    </DialogPrimitive.Description>
+                    <div className="mt-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-amber-900/70">
+                      <span>Admit One</span>
+                      <span className="h-px flex-1 bg-amber-900/30" />
+                      <span>VIP Access</span>
+                    </div>
+                  </div>
+
+                  <div className="relative hidden items-center sm:flex">
+                    <div className="h-[88%] border-l-2 border-dashed border-amber-800/50" />
+                  </div>
+
+                  <div className="relative flex w-36 flex-col items-center justify-center gap-4 px-4 py-7 sm:w-44 sm:px-6">
+                    <div className="relative">
+                      <div className="absolute inset-0 animate-ping rounded-full bg-amber-700/30" />
+                      <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-amber-950/90 shadow-inner ring-2 ring-amber-700/60">
+                        <Ticket className="h-6 w-6 text-amber-300" strokeWidth={2.2} aria-hidden="true" />
+                        <Star
+                          className="absolute -right-1 -top-1 h-4 w-4 fill-amber-300 text-amber-300 drop-shadow"
+                          strokeWidth={1.5}
+                          aria-hidden="true"
+                        />
+                      </div>
+                    </div>
+
+                    <DialogPrimitive.Close asChild>
+                      <button
+                        type="button"
+                        data-golden-ticket-close
+                        className="group relative overflow-hidden rounded-md bg-amber-950 px-5 py-2.5 text-xs font-black uppercase tracking-widest text-amber-200 shadow-lg ring-1 ring-amber-700/60 transition-all duration-300 hover:bg-amber-900 hover:text-amber-100 hover:shadow-[0_0_20px_rgba(251,191,36,0.6)] hover:ring-amber-400 active:scale-95 sm:text-sm"
+                      >
+                        <span className="relative z-10">Чудово!</span>
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-amber-300/30 to-transparent transition-transform duration-700 group-hover:translate-x-full"
+                        />
+                      </button>
+                    </DialogPrimitive.Close>
+
+                    <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-amber-900/70">
+                      №{ticketNumber}
                     </span>
                   </div>
-
-                  <DialogPrimitive.Title className="font-display text-lg font-black uppercase leading-snug tracking-tight text-amber-950 sm:text-xl">
-                    Квиток №{ticketNumber} отримано!
-                  </DialogPrimitive.Title>
-
-                  <DialogPrimitive.Description className="mt-4 text-pretty text-sm font-medium leading-relaxed text-amber-950/85 sm:text-base">
-                    <span className="font-semibold text-amber-950">{heroName}</span>, ми зв&apos;яжемося з вами
-                    найближчим часом для старту квесту.
-                  </DialogPrimitive.Description>
-
-                  <div className="mt-6 flex items-center justify-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-amber-900/70">
-                    <Sparkles className="size-3.5 text-amber-800" aria-hidden="true" />
-                    Гільдія IT
-                  </div>
-                </div>
+                </article>
               </div>
             </div>
 
-            <DialogPrimitive.Close asChild>
-              <Button
-                type="button"
-                variant="secondary"
-                data-golden-ticket-close
-                className="relative z-10 mt-6 h-11 min-w-[10rem] border-border/80 bg-card/90 font-display text-sm font-bold uppercase tracking-wide text-foreground backdrop-blur-sm hover:bg-card"
-              >
-                Чудово!
-              </Button>
-            </DialogPrimitive.Close>
+            <div className="pointer-events-none absolute inset-x-0 -bottom-8 flex justify-center" aria-hidden="true">
+              <div className="h-6 w-[42%] rounded-full bg-amber-800/25 blur-xl" />
+            </div>
           </div>
         </DialogPrimitive.Content>
       </DialogPortal>
